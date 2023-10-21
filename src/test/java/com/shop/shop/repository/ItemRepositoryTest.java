@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @SpringBootTest
-@TestPropertySource(properties = {"spring.config.location = classpath:application.properties"})
+@TestPropertySource(locations = "classpath:application-test.properties")
 @Transactional
 public class ItemRepositoryTest {
 
