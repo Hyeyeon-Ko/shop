@@ -24,42 +24,35 @@ public class SecurityConfig {
     @Autowired
     MemberService memberService;
 
-//    @Autowired
-//    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            HandlerMappingIntrospector introspector) throws Exception {
-//        MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
-//        http.csrf(AbstractHttpConfigurer::disable);
-//        http.authorizeHttpRequests(request -> request
-//                        .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/")).permitAll()
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/admin/**")).permitAll()
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/admin/**")).hasRole("ADMIN")
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/js/**")).permitAll()
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/img/**")).permitAll()
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/members/**")).permitAll()
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/item/**")).permitAll()
-//                        .requestMatchers(mvcMatcherBuilder.pattern("/images/**")).permitAll()
-//                        .anyRequest()
-//                        .authenticated()
-//                )
-//                .formLogin(login -> login
-//                        .loginPage("/members")
-//                        .loginProcessingUrl("/login")
-//                        .defaultSuccessUrl("/")
-//                        .failureUrl("/members/login/error")
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout
-//                        .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
-//                        .logoutSuccessUrl("/")
-//                );
-//
-//        http.exceptionHandling(exception -> exception
-//                .authenticationEntryPoint
-//        );
+        MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.authorizeHttpRequests(request -> request
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/admin/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/admin/**")).hasRole("ADMIN")
+                        .requestMatchers(mvcMatcherBuilder.pattern("/js/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/img/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/members/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/item/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/images/**")).permitAll()
+                        .anyRequest()
+                        .authenticated()
+                )
+                .formLogin(login -> login
+                        .loginPage("/members")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/")
+                        .failureUrl("/members/login/error")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
+                        .logoutSuccessUrl("/")
+                );
 
         return http.build();
     }
@@ -68,11 +61,11 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
-//
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-//            throws Exception {
-//        return authenticationConfiguration.getAuthenticationManager();
-//    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
 }
