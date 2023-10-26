@@ -1,6 +1,6 @@
 package com.shop.shop.repository;
 
-제import com.shop.shop.constant.ItemSellStatus;
+import com.shop.shop.constant.ItemSellStatus;
 import com.shop.shop.entity.Item;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
