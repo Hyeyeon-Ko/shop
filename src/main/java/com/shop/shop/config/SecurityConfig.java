@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -25,47 +25,51 @@ public class SecurityConfig {
     MemberService memberService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           HandlerMappingIntrospector introspector) throws Exception {
-        MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
-        http.csrf(AbstractHttpConfigurer::disable);
-        http.authorizeHttpRequests(request -> request
-                        .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
-                        .requestMatchers(mvcMatcherBuilder.pattern("/")).permitAll()
-                        .requestMatchers(mvcMatcherBuilder.pattern("/admin/**")).permitAll()
-                        .requestMatchers(mvcMatcherBuilder.pattern("/admin/**")).hasRole("ADMIN")
-                        .requestMatchers(mvcMatcherBuilder.pattern("/js/**")).permitAll()
-                        .requestMatchers(mvcMatcherBuilder.pattern("/img/**")).permitAll()
-                        .requestMatchers(mvcMatcherBuilder.pattern("/members/**")).permitAll()
-                        .requestMatchers(mvcMatcherBuilder.pattern("/item/**")).permitAll()
-                        .requestMatchers(mvcMatcherBuilder.pattern("/images/**")).permitAll()
-                        .anyRequest()
-                        .authenticated()
-                )
-                .formLogin(login -> login
-                        .loginPage("/members")
-                        .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/")
-                        .failureUrl("/members/login/error")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
-                        .logoutSuccessUrl("/")
-                );
-
-        return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder(){
+    BCryptPasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-            throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           HandlerMappingIntrospector introspector) throws Exception {
+        MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
+        http.csrf(AbstractHttpConfigurer::disable);
+        http
+                .formLogin(login -> login
+                        .loginPage("/members/login")
+                        .defaultSuccessUrl("/")
+                        .usernameParameter("email")
+                        .failureUrl("/members/login/error")
+                        .usernameParameter("email")
+                )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
+                        .logoutSuccessUrl("/")
+                )
+                .authorizeHttpRequests(request -> request
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/members/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/item/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/images/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/admin/**")).hasRole("ADMIN")
+                        .requestMatchers(mvcMatcherBuilder.pattern("/js/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/css/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/img/**")).permitAll()
+                        .anyRequest()
+                        .authenticated()
+                );
+
+        http.exceptionHandling(authenticationManager -> authenticationManager
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
+
+
+        return http.build();
     }
 
 }
