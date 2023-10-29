@@ -2,7 +2,9 @@ package com.shop.shop.entity;
 
 import com.shop.shop.constant.ItemSellStatus;
 import com.shop.shop.repository.ItemRepository;
+import com.shop.shop.repository.OrderItemRepository;
 import com.shop.shop.repository.OrderRepository;
+import com.shop.shop.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
@@ -30,6 +32,10 @@ public class OrderTest {
 
     @PersistenceContext
     EntityManager em;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     public Item createItem(){
         Item item = new Item();
@@ -66,5 +72,49 @@ public class OrderTest {
         Order savedOrder = orderRepository.findById(order.getId())
                 .orElseThrow(EntityNotFoundException::new);
         assertEquals(3, savedOrder.getOrderItems().size());
+    }
+
+    public Order createOrder(){
+        Order order = new Order();
+        for(int i=0; i<3; i++){
+            Item item = createItem();
+            itemRepository.save(item);
+            OrderItem orderItem = new OrderItem();
+            orderItem.setItem(item);
+            orderItem.setCount(10);
+            orderItem.setOrderPrice(1000);
+            orderItem.setOrder(order);
+            order.getOrderItems().add(orderItem);
+        }
+        Member member = new Member();
+        memberRepository.save(member);
+
+        order.setMember(member);
+        orderRepository.save(order);
+        return order;
+    }
+
+    @Test
+    @DisplayName("고아객체 제거 테스트")
+    public void orphanRemovalTest(){
+        Order order = this.createOrder();
+        order.getOrderItems().remove(0);
+        em.flush();
+    }
+
+    @Test
+    @DisplayName("지연 로딩 테스트")
+    public void lazyLoadingTest() {
+        Order order = this.createOrder();
+        Long orderItemId = order.getOrderItems().get(0).getId();
+        em.flush();
+        em.clear();
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(EntityNotFoundException::new);
+        System.out.println("Order class: " + orderItem.getOrder().getClass());
+        System.out.println("===================");
+        orderItem.getOrder().getOrderDate();
+        System.out.println("===================");
+
     }
 }
