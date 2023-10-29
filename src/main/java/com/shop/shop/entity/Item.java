@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "item")
 //롬복을 사용하여 어노테이션으로 Getter/Setter/ToString 처리
-@Getter
-@Setter
+@Getter @Setter
 @ToString
 public class Item extends BaseEntity {
 
